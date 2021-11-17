@@ -27,7 +27,7 @@ HTTPClient http;
 
 float temp;
 float hum;
-int hpa;
+float hpa;
 
 WiFiClientSecure client;
 Adafruit_BME280 bme; // I2C
