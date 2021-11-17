@@ -1,5 +1,8 @@
 #include <Adafruit_BME280.h>
 #include <SSD1306.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include "conf.h"
 
 #define LED_BLUE 17
 #define SDA 21
@@ -9,12 +12,24 @@
 #define SCREEN_WIDTH 128 
 #define SCREEN_HEIGHT 64
 #define OLED_RESET -1
+const int BATTERY_PIN = A0;
 
+String MAC_ADDRESS = "";
+
+
+
+
+// WEB SERVER Data
+const String HTTP_METHOD = "POST";
+const String PATH_NAME   = "/api/device/sensor";
+String token = "";
+HTTPClient http;
 
 float temp;
 float hum;
 int hpa;
 
+WiFiClientSecure client;
 Adafruit_BME280 bme; // I2C
 SSD1306 screen(SSD1306_BUS, SDA, SCL);
 
@@ -92,14 +107,16 @@ void setup() {
   if (!bme.begin(BME280_BUS)) {
     Serial.println("Could not find a valid BMP280 sensor, check wiring!");
     ledTrigger(LED_BLUE, true);
+    ESP.restart();
   }
   else {
     Serial.println("BMP280 connected!");
   }
+  
+  setupWifi();
 
   screen.init();
 
-  screen.flipScreenVertically();
   screen.setFont(ArialMT_Plain_16);
 
 }
@@ -130,6 +147,8 @@ void loop() {
     screen.drawXbm(screen.getWidth()-37, 5, 30, 30, error);
     screen.display();
   }
+
+  webRequest();
 
   esp_deep_sleep(60e6);
 }
@@ -170,9 +189,109 @@ bool getMeteoChartsData() {
   return true;
 }
 
+void webRequest() {
+
+  String queryString = "{\"mac\":\"" + MAC_ADDRESS + "\",\"battery\":\"" + String(batteryPercent(), 2) + "\",\"temperature\":\"" + temp + "\",\"humidity\":" + hum + ",\"pressure\":\"" + hpa + "\",\"token\":\"" + token + "\"}";
+
+  Serial.println("LOGS : " + queryString);
+
+  http.begin(client, SERVER_NAME, HTTP_PORT, PATH_NAME, true);
+  http.addHeader("Content-Type", "application/json");
+  int httpResponseCode = http.POST(queryString);
+
+  String payload = "null";
+  if (httpResponseCode > 0) {
+    //Get the request response payload
+    payload = http.getString();
+  }
+  else {
+    Serial.print("FATL : Server unreachable - Code : ");
+    Serial.println(httpResponseCode);
+    return;
+  }
+
+  // Free resources
+  http.end();
+
+  //Payload management
+
+  JSONVar json_payload = JSON.parse(payload);
+  if (JSON.typeof(json_payload) == "undefined") {
+    Serial.print("WARN : Parsing input failed! -> ");
+    Serial.println(payload);
+    return;
+  }
+
+  int code = JSON.stringify(json_payload["code"]).toInt();
+  String message = JSON.stringify(json_payload["message"]);
+
+  String new_token = (const char*) json_payload["register_token"];
+
+
+  switch(code) {
+    case 0:
+      Serial.println("DEBG : Ok");
+      break;
+    case 9:
+      Serial.println("DEBG : Invalid payload ");
+      // LED ERROR CODE Payload error
+      // errorMacMissing();
+    case 10:
+      Serial.println("DEBG : Missing Mac ");
+      // LED ERROR CODE MAC UNKNOWN
+      // errorMacMissing();
+      break; 
+    case 11:  
+      Serial.println("DEBG : Mac not found in DB");
+      break;
+    case 12:  
+      Serial.println("DEBG : Wrong Token");
+      break;
+    case 50:
+      Serial.println("DEBG : Token register - " + new_token);
+      token = new_token;
+      webRequest();
+      break;
+    default :
+      Serial.print("DEBG : Unknown code - ");
+      Serial.println(json_payload["code"]);
+      break;
+  }
+  
+}
+
+
 void ledTrigger(int color, bool on){
   if (on)
     digitalWrite(color, LOW);
   else
     digitalWrite(color, HIGH);
+}
+
+void setupWifi() {
+
+  Serial.print("Connecting to : ");
+  Serial.println(WIFI_SSID);
+
+  WiFi.begin(WIFI_SSID, WIFI_PASSWD);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print("-");
+    delay(500);
+  }  
+
+  MAC_ADDRESS = WiFi.macAddress();
+  Serial.println("INFO : Mac Address : " + MAC_ADDRESS);
+
+  // Print local IP address 
+  Serial.println("");
+  Serial.println("WiFi connected.");
+  Serial.print("IP address : ");
+  Serial.println(WiFi.localIP());
+}
+
+float batteryPercent() {
+  int value = analogRead(BATTERY_PIN);
+  float voltage = value * 5.0/1023;
+  float perc = map(voltage, 3.6, 4.2, 0, 100);
 }
