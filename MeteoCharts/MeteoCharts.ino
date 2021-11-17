@@ -21,7 +21,7 @@ String MAC_ADDRESS = "";
 
 // WEB SERVER Data
 const String HTTP_METHOD = "POST";
-const String PATH_NAME   = "/api/device/sensor";
+const String PATH_NAME   = "/api/devices/sensors";
 String token = "";
 HTTPClient http;
 
