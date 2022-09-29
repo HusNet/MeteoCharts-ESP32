@@ -113,7 +113,7 @@ void setup() {
     Serial.println("BMP280 connected!");
   }
   
-  setupWifi();
+  //setupWifi();
 
   screen.init();
 
@@ -148,7 +148,7 @@ void loop() {
     screen.display();
   }
 
-  webRequest();
+  //webRequest();
 
   esp_deep_sleep(60e6);
 }
