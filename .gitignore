@@ -21,4 +21,5 @@ src/ESP32_Arduino/MeteoCharts/cmake-build-debug/
 # Project
 src/ESP32_Arduino/MeteoCharts/conf.h
 src/ESP32_Arduino/MeteoCharts/conf_d32.h
-src/ESP32_Arduino/ArduinoOutput/
+src/ESP32_Arduino/ArduinoOutput/*
+!src/ESP32_Arduino/ArduinoOutput/.gitignore
