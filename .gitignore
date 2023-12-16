@@ -4,3 +4,14 @@
 
 # Project
 MeteoCharts/conf.h
+
+# Visual Studio
+src/ESP32_Arduino/MeteoCharts/.vscode/c_cpp_properties.json
+src/ESP32_Arduino/MeteoCharts/.vscode/settings.json
+
+# cmake
+src/ESP32_Arduino/MeteoCharts/cmake-build-debug/
+
+# Project
+src/ESP32_Arduino/MeteoCharts/conf.h
+src/ESP32_Arduino/MeteoCharts/conf_d32.h
