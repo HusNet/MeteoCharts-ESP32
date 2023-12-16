@@ -1,0 +1,10 @@
+# Visual Studio
+.vscode/c_cpp_properties.json
+.vscode/settings.json
+
+# cmake
+cmake-build-debug/
+
+# Project
+conf.h
+conf_d32.h
