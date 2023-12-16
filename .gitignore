@@ -1,11 +1,14 @@
+# IDEA
+.idea/
+
 # Visual Studio
 .vscode/c_cpp_properties.json
 .vscode/settings.json
-
 src/ESP32_Arduino/MeteoCharts/.vscode/c_cpp_properties.json
 src/ESP32_Arduino/MeteoCharts/.vscode/settings.json
 
-src/ESP32_Espidf/.pio
+src/ESP32_Espidf/.pio/
+src/ESP32_Espidf/MeteoCharts/.pio/
 src/ESP32_Espidf/.vscode/.browse.c_cpp.db*
 src/ESP32_Espidf/.vscode/c_cpp_properties.json
 src/ESP32_Espidf/.vscode/launch.json
@@ -18,3 +21,4 @@ src/ESP32_Arduino/MeteoCharts/cmake-build-debug/
 # Project
 src/ESP32_Arduino/MeteoCharts/conf.h
 src/ESP32_Arduino/MeteoCharts/conf_d32.h
+src/ESP32_Arduino/ArduinoOutput/
